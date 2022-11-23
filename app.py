@@ -1,16 +1,8 @@
-import requests
 import telebot
-import json
-
-TOKEN = '5843177964:AAHVUYtZX00lX_Bumu8IXufuyZ9WNL7buX0'
+from config import *
+from extensions import *
 
 bot = telebot.TeleBot(TOKEN)
-
-keys = {
-    'евро': 'EUR',
-    'доллар': 'USD',
-    'рубль': 'RUB'
-}
 
 # тест бота
 # @bot.message_handler()
@@ -39,9 +31,13 @@ def values(message: telebot.types.Message):
 # обработчик перевода
 @bot.message_handler(content_types=['text',])
 def convertMoney(message: telebot.types.Message):
-    target, base, amount = message.text.split(' ')
-    request = requests.get(f'https://v6.exchangerate-api.com/v6/bc707e8c44ea94453d11304a/pair/{keys[target]}/{keys[base]}/{amount}')
-    total_base = json.loads(request.content)['conversion_result']
+    values = message.text.split(' ')
+    if len(values) > 3:
+        raise ConversionException('Введено более трех входных параметров! Попробуйте еще раз!')
+
+    target, base, amount = values
+    total_base = ExchangeMaker.convertMoney(target, base, amount)
+
     text = f'Цена {amount} {target} в {base} - {total_base}'
     bot.send_message(message.chat.id, text)
 
