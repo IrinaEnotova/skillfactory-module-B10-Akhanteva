@@ -1,5 +1,6 @@
 import requests
 import telebot
+import json
 
 TOKEN = '5843177964:AAHVUYtZX00lX_Bumu8IXufuyZ9WNL7buX0'
 
@@ -34,5 +35,14 @@ def values(message: telebot.types.Message):
     for key in keys.keys():
         text = '\n'.join((text, key, ))
     bot.reply_to(message, text)
+
+# обработчик перевода
+@bot.message_handler(content_types=['text',])
+def convertMoney(message: telebot.types.Message):
+    target, base, amount = message.text.split(' ')
+    request = requests.get(f'https://v6.exchangerate-api.com/v6/bc707e8c44ea94453d11304a/pair/{keys[target]}/{keys[base]}/{amount}')
+    total_base = json.loads(request.content)['conversion_result']
+    text = f'Цена {amount} {target} в {base} - {total_base}'
+    bot.send_message(message.chat.id, text)
 
 bot.polling()
