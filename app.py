@@ -31,14 +31,21 @@ def values(message: telebot.types.Message):
 # обработчик перевода
 @bot.message_handler(content_types=['text',])
 def convertMoney(message: telebot.types.Message):
-    values = message.text.split(' ')
-    if len(values) > 3:
-        raise ConversionException('Введено более трех входных параметров! Попробуйте еще раз!')
+    try:
+        values = message.text.split(' ')
+        if len(values) > 3:
+            raise ConversionException('Введено более трех входных параметров. Попробуйте еще раз!')
+        elif len(values) < 3:
+            raise ConversionException('Вы ввели не все параметры для перевода.')
 
-    target, base, amount = values
-    total_base = ExchangeMaker.convertMoney(target, base, amount)
-
-    text = f'Цена {amount} {target} в {base} - {total_base}'
-    bot.send_message(message.chat.id, text)
+        target, base, amount = values
+        total_base = ExchangeMaker.get_price(target, base, amount)
+    except ConversionException as e:
+        bot.reply_to(message, f'Ошибка пользователя \n{e}')
+    except Exception as e:
+        bot.reply_to(message, f'Не удалось обработать команду. \n{e}')
+    else:
+        text = f'Цена {amount} {target} в {base} - {total_base}'
+        bot.send_message(message.chat.id, text)
 
 bot.polling()

@@ -7,9 +7,9 @@ class ConversionException(Exception):
 
 class ExchangeMaker:
     @staticmethod
-    def convertMoney(target: str, base: str, amount: str):
+    def get_price(target: str, base: str, amount: str):
         if target == base:
-            raise ConversionException(f'Невозможно перевести! Введены одинаковые названия валют {base}!')
+            raise ConversionException(f'Невозможно перевести, так как введены одинаковые названия валют {base}.')
 
         try:
             target_ticker = keys[target]
